@@ -8,7 +8,7 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 #define LED_VERDE 7
 #define LED_ROJO 6
 
-String UID_SIMULADO = "UID_aaaZUL";  // Cambia por AZUL o BLANCO
+String UID_SIMULADO = "UID_BLmmmANCO";  // Cambia por AZUL o BLANCO
 
 void setup() {
   Serial.begin(9600);
@@ -32,11 +32,13 @@ void loop() {
   delay(5000); // Enviamos tarjeta cada 5 segundos
   
   lcd.clear();
-  lcd.setCursor(0, 0);
+   lcd.print("Pase tarjeta...");
+  delay(3000);
+  lcd.clear();
   lcd.print("Leyendo tarjeta...");
-  
   Serial.println(UID_SIMULADO); // ENVIA UID A PYTHON
-
+  delay(2000);
+  
   // Esperar respuesta de Python
   while (!Serial.available()) {}
   
@@ -72,5 +74,5 @@ void loop() {
   digitalWrite(LED_VERDE, LOW);
   digitalWrite(LED_ROJO, LOW);
   lcd.clear();
-  lcd.print("Pase tarjeta...");
+ 
 }

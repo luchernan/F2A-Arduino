@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,7 +23,7 @@
             align-items: center;
             height: 100vh;
             background-color: var(--bg-color);
-            background-image: 
+            background-image:
                 radial-gradient(at 0% 0%, rgba(0, 242, 234, 0.15) 0px, transparent 50%),
                 radial-gradient(at 100% 100%, rgba(255, 0, 85, 0.15) 0px, transparent 50%);
             font-family: 'Inter', sans-serif;
@@ -104,14 +105,34 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; box-shadow: 0 0 0 0 rgba(0, 242, 234, 0.4); }
-            70% { transform: scale(1.3); opacity: 0; box-shadow: 0 0 0 20px rgba(0, 242, 234, 0); }
-            100% { transform: scale(1); opacity: 0; }
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+                box-shadow: 0 0 0 0 rgba(0, 242, 234, 0.4);
+            }
+
+            70% {
+                transform: scale(1.3);
+                opacity: 0;
+                box-shadow: 0 0 0 20px rgba(0, 242, 234, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         .loader {
@@ -123,7 +144,7 @@
             border-radius: 2px;
             overflow: hidden;
         }
-        
+
         .loader-bar {
             height: 100%;
             background: var(--primary);
@@ -133,17 +154,24 @@
         }
 
         @keyframes loading {
-            0% { width: 0%; transform: translateX(-100%); }
-            100% { width: 100%; transform: translateX(100%); }
-        }
+            0% {
+                width: 0%;
+                transform: translateX(-100%);
+            }
 
+            100% {
+                width: 100%;
+                transform: translateX(100%);
+            }
+        }
     </style>
 </head>
+
 <body>
 
     <div class="container">
         <h1>SISTEMA F2A</h1>
-        
+
         <div class="scanner-container">
             <div class="scanner-ring"></div>
             <div class="scanner-ring"></div>
@@ -151,7 +179,7 @@
         </div>
 
         <p class="status-text">Pase su tarjeta de identificación para acceder</p>
-        
+
         <div class="loader" id="loader">
             <div class="loader-bar"></div>
         </div>
@@ -171,9 +199,9 @@
                         statusText.textContent = "Acceso Autorizado. Redirigiendo...";
                         statusText.style.color = "#00f2ea";
                         loader.style.display = "block";
-                        
+
                         setTimeout(() => {
-                             window.location.href = `/dashboard/?user=${encodeURIComponent(data.user_name)}`;
+                            window.location.href = "/dashboard/";
                         }, 1000);
                     } else {
                         // Continue polling
@@ -190,4 +218,5 @@
         pollAccess();
     </script>
 </body>
+
 </html>
