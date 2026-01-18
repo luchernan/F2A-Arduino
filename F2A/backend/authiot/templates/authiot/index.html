@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Acceso F2A</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #00f2ea;
+            --secondary: #ff0055;
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 242, 234, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(255, 0, 85, 0.15) 0px, transparent 50%);
+            font-family: 'Inter', sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: var(--card-bg);
+            padding: 4rem;
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 400px;
+            width: 100%;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 242, 234, 0.5);
+        }
+
+        .scanner-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scanner-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            animation: pulse 2s infinite;
+        }
+
+        .scanner-ring:nth-child(2) {
+            width: 80%;
+            height: 80%;
+            animation-delay: 0.5s;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 6px;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .card-icon::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 5px;
+            width: 15px;
+            height: 10px;
+            background: #ccc;
+            border-radius: 2px;
+        }
+
+        .status-text {
+            font-size: 1rem;
+            color: #94a3b8;
+            font-weight: 300;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; box-shadow: 0 0 0 0 rgba(0, 242, 234, 0.4); }
+            70% { transform: scale(1.3); opacity: 0; box-shadow: 0 0 0 20px rgba(0, 242, 234, 0); }
+            100% { transform: scale(1); opacity: 0; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .loader {
+            display: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 1rem;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .loader-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s;
+            animation: loading 1.5s infinite ease-in-out;
+        }
+
+        @keyframes loading {
+            0% { width: 0%; transform: translateX(-100%); }
+            100% { width: 100%; transform: translateX(100%); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>SISTEMA F2A</h1>
+        
+        <div class="scanner-container">
+            <div class="scanner-ring"></div>
+            <div class="scanner-ring"></div>
+            <div class="card-icon"></div>
+        </div>
+
+        <p class="status-text">Pase su tarjeta de identificación para acceder</p>
+        
+        <div class="loader" id="loader">
+            <div class="loader-bar"></div>
+        </div>
+    </div>
+
+    <script>
+        const statusText = document.querySelector('.status-text');
+        const loader = document.getElementById('loader');
+        let lastTimestamp = null;
+
+        function pollAccess() {
+            fetch('/api/check-access/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.found) {
+                        // Success!
+                        statusText.textContent = "Acceso Autorizado. Redirigiendo...";
+                        statusText.style.color = "#00f2ea";
+                        loader.style.display = "block";
+                        
+                        setTimeout(() => {
+                             window.location.href = `/dashboard/?user=${encodeURIComponent(data.user_name)}`;
+                        }, 1000);
+                    } else {
+                        // Continue polling
+                        setTimeout(pollAccess, 1000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    setTimeout(pollAccess, 2000);
+                });
+        }
+
+        // Start polling immediately
+        pollAccess();
+    </script>
+</body>
+</html>
