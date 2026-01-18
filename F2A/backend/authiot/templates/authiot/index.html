@@ -195,16 +195,29 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.found) {
-                        // Success!
-                        statusText.textContent = "Acceso Autorizado. Redirigiendo...";
-                        statusText.style.color = "#00f2ea";
-                        loader.style.display = "block";
+                        if (data.status === "OK") {
+                            // Éxito: Redirigir
+                            statusText.textContent = "Acceso Autorizado. Redirigiendo...";
+                            statusText.style.color = "#00f2ea";
+                            loader.style.display = "block";
 
-                        setTimeout(() => {
-                            window.location.href = "/dashboard/";
-                        }, 1000);
+                            setTimeout(() => {
+                                window.location.href = "/dashboard/";
+                            }, 1000);
+                        } else {
+                            // Fallo: Mostrar error en rojo
+                            statusText.textContent = "ACCESO DENEGADO - UID NO VÁLIDO";
+                            statusText.style.color = "#ff0055";
+
+                            // Resetear el mensaje después de 2 segundos
+                            setTimeout(() => {
+                                statusText.textContent = "Pase su tarjeta de identificación para acceder";
+                                statusText.style.color = "#94a3b8";
+                                pollAccess(); // Reanudar polling
+                            }, 2000);
+                        }
                     } else {
-                        // Continue polling
+                        // Continuar buscando
                         setTimeout(pollAccess, 1000);
                     }
                 })

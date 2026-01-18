@@ -33,11 +33,11 @@ void loop() {
   
   lcd.clear();
    lcd.print("Pase tarjeta...");
-  delay(3000);
+  delay(2000);
   lcd.clear();
   lcd.print("Leyendo tarjeta...");
   Serial.println(UID_SIMULADO); // ENVIA UID A PYTHON
-  delay(2000);
+  delay(1000);
   
   // Esperar respuesta de Python
   while (!Serial.available()) {}

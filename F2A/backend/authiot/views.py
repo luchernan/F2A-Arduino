@@ -36,22 +36,28 @@ class RFIDValidateView(APIView):
 
 class CheckAccessView(APIView):
     def get(self, request):
-        # Buscamos el éxito más reciente en los últimos 10 segundos
-        time_threshold = timezone.now() - timedelta(seconds=10)
+        # Buscamos cualquier intento reciente (hace menos de 3 segundos)
+        time_threshold = timezone.now() - timedelta(seconds=3)
         latest_log = AccessLog.objects.filter(
-            timestamp__gte=time_threshold,
-            status="OK"
+            timestamp__gte=time_threshold
         ).order_by('-timestamp').first()
 
         if latest_log:
-            # ¡IMPORTANTE! Aquí vinculamos el acceso físico con la sesión del navegador
-            request.session['auth_user_name'] = latest_log.user_name
-            request.session['is_authenticated_iot'] = True
-            
-            return Response({
-                "found": True, 
-                "user_name": latest_log.user_name
-            })
+            if latest_log.status == "OK":
+                # Sesión para éxito
+                request.session['auth_user_name'] = latest_log.user_name
+                request.session['is_authenticated_iot'] = True
+                return Response({
+                    "found": True, 
+                    "status": "OK",
+                    "user_name": latest_log.user_name
+                })
+            else:
+                # Informamos del fallo
+                return Response({
+                    "found": True, 
+                    "status": "DENY"
+                })
         
         return Response({"found": False})
 
