@@ -94,4 +94,4 @@ python serial_service.py
 Este proyecto es de uso educativo para prácticas de desarrollo web y ciberseguridad.
 
 ---
-**Desarrollado con ❤️ por Antigravity & User**
+**Desarrollado por Lucas Hernández**
