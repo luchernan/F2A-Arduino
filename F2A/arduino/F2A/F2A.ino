@@ -1,78 +1,85 @@
+#include <SPI.h>
+#include <MFRC522.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
-// Dirección I2C común: 0x27. Si no funciona, prueba con 0x3F.
-// Requiere instalar librería: "LiquidCrystal I2C"
+
+#define RST_PIN         9          
+#define SS_PIN          10         
+
+MFRC522 mfrc522(SS_PIN, RST_PIN);  
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 #define LED_VERDE 7
 #define LED_ROJO 6
 
-String UID_SIMULADO = "UID_BLmmmANCO";  // Cambia por AZUL o BLANCO
-
 void setup() {
   Serial.begin(9600);
-  
-  // INICIO LCD
+  SPI.begin();          
+  mfrc522.PCD_Init();   
   lcd.init();
   lcd.backlight();
   lcd.setCursor(0, 0);
   lcd.print("SISTEMA F2A");
   lcd.setCursor(0, 1);
-  lcd.print("Iniciando...");
+  lcd.print("Listo...");
 
   pinMode(LED_VERDE, OUTPUT);
   pinMode(LED_ROJO, OUTPUT);
-  
-  // NOTA: No enviamos prints de debug (ej. "ARDUINO_READY") por Serial
-  // porque el script de Python creería que es un UID de tarjeta y daría error.
 }
 
 void loop() {
-  delay(5000); // Enviamos tarjeta cada 5 segundos
-  
+ 
+  if (!mfrc522.PICC_IsNewCardPresent()) {
+    return;
+  }
+ 
+  if (!mfrc522.PICC_ReadCardSerial()) {
+    return;
+  }
+
+
   lcd.clear();
-   lcd.print("Pase tarjeta...");
-  delay(2000);
-  lcd.clear();
-  lcd.print("Leyendo tarjeta...");
-  Serial.println(UID_SIMULADO); // ENVIA UID A PYTHON
-  delay(1000);
-  
-  // Esperar respuesta de Python
+  lcd.print("Leyendo...");
+
+
+  String uidLeido = "";
+  for (byte i = 0; i < mfrc522.uid.size; i++) {
+    uidLeido += String(mfrc522.uid.uidByte[i] < 0x10 ? "0" : "");
+    uidLeido += String(mfrc522.uid.uidByte[i], HEX);
+  }
+  uidLeido.toUpperCase(); 
+
+
+  Serial.println(uidLeido); 
+
   while (!Serial.available()) {}
-  
   String respuesta = Serial.readStringUntil('\n');
-  
-  // NOTA: No hacemos Serial.println de lo recibido, o Python lo leerá de nuevo como tarjeta.
 
   lcd.clear();
   lcd.setCursor(0, 0);
 
   if (respuesta.startsWith("OK")) {
     digitalWrite(LED_VERDE, HIGH);
-    digitalWrite(LED_ROJO, LOW);
-    
     lcd.print("ACCESO CONCEDIDO");
     
-    // Mostramos mensaje extra si viene (ej. "OK:Bienvenido...")
     int split = respuesta.indexOf(':');
     if (split > 0) {
       lcd.setCursor(0, 1);
       lcd.print(respuesta.substring(split + 1));
     }
-    
   } else {
-    digitalWrite(LED_VERDE, LOW);
     digitalWrite(LED_ROJO, HIGH);
     lcd.print("ACCESO DENEGADO");
+    lcd.setCursor(0, 1);
+    lcd.print("UID NO REGIST.");
   }
 
   delay(3000);
-  
-  // Reset estado
+
   digitalWrite(LED_VERDE, LOW);
   digitalWrite(LED_ROJO, LOW);
+  mfrc522.PICC_HaltA(); 
   lcd.clear();
- 
+  lcd.print("Pase tarjeta...");
 }

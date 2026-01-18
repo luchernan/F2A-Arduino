@@ -1,9 +1,8 @@
-# serial_service/serial_service.py
 import serial
 import requests
 import time
 
-PUERTO = "COM3"      # Ajusta según tu Arduino
+PUERTO = "COM3"      
 BAUDIOS = 9600
 
 API_URL = "http://127.0.0.1:8000/api/rfid/validate/"
